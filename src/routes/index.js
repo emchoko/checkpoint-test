@@ -1,5 +1,8 @@
 const streamer = require('./streamer')
+const docs = require('./docs')
+const router = require('express').Router()
 
-module.exports = (router) => {
-  streamer(router)
-}
+docs(router)
+streamer(router)
+
+module.exports = router

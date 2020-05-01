@@ -5,7 +5,7 @@ const options = {
   swaggerDefinition: {
     openapi: '3.0.0',
     info: {
-      title: 'Documentation of the test for the Checkpoint interview',
+      title: 'Checkpoint Interview API Documentation',
       version: '1.0.0',
       description: 'Simple API to fetch streams information from Twitch',
       contact: {
@@ -19,10 +19,15 @@ const options = {
       }
     ]
   },
-  apis: []
+  apis: ['./routes/streamer.js']
 }
-
 module.exports = (router) => {
   const specification = swaggerJsdoc(options)
-  router.get('/docs', swaggerUi.setup(specification, { explorer: true }))
+  router.use('/docs', swaggerUi.serve)
+  router.get(
+    '/docs',
+    swaggerUi.setup(specification, {
+      explorer: true
+    })
+  )
 }
