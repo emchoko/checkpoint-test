@@ -1,0 +1,81 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Checkpoint API Documentation (Interview Test)",
+    "description": "Documentation for an API that fetches data from Twitch",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "host": "localhost:3000",
+  "basePath": "/api/v1",
+  "tags": [
+    {
+      "name": "Users",
+      "description": "API for users in the system"
+    }
+  ],
+  "schemes": ["http"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": ["Streamer"],
+        "description": "The root of the API",
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Description of the all the available endpoints"
+          }
+        }
+      }
+    },
+    "/{streamerId}": {
+      "get": {
+        "tags": ["Streamer"],
+        "description": "Check if a streamer is currently streaming and the get the game that is being streamed",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Streamer ID that will be fetched"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "JSON object containing whether the streamer is streaming and which game is being played",
+            "schema": {
+              "$ref": "#/definitions/StreamerResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "isStreaming": {
+      "type": "boolean",
+      "description": "Shows if a streamer is playing or not",
+      "example": true
+    },
+    "gameName": {
+      "type": "string",
+      "example": "Counter-Strike"
+    },
+    "StreamerResponse": {
+      "type": "object",
+      "properties": {
+        "isStreaming": {
+          "$ref": "#/definitions/isStreaming"
+        },
+        "gameName": {
+          "$ref": "#/definitions/gameName"
+        }
+      }
+    }
+  }
+}
