@@ -19,20 +19,21 @@ module.exports = (router) => {
             .getStreamerById(userId)
             .then((streamer) => {
               streamer.json().then((body) => {
-                if (body.status === 200) {
+                if (res.statusCode === 200) {
                   // this means that the user is streaming
                   if (body.data.length > 0) {
                     // done(null, body.data[0].game_id)
-                    let resBody = StreamerResponse(true, null)
-                    res.status(200).json(JSON.parse(resBody))
+                    let resBody = new StreamerResponse(true, null)
+                    res.status(200).json({ streaming: true, game: null })
                     done(null)
                   } else {
-                    let resBody = StreamerResponse(false, null)
-                    res.status(200).json(JSON.parse(resBody))
+                    let resBody = new StreamerResponse(false, null)
+                    res.status(200).json({ streaming: true, game: null })
                     done(null)
                   }
                 } else {
-                  return res.status(body.status).json({
+                  console.log(res.statusCode)
+                  return res.status(res.statusCode).json({
                     message: 'There was a problem fetching the Twitch API'
                   })
                 }
