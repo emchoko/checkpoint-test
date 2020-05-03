@@ -125,6 +125,5 @@ module.exports = (router) => {
     )
   }
 
-  router.get('/', fetchIndex)
   router.get('/streams', fetchStreamer)
 }
