@@ -3,6 +3,7 @@ const waterfall = require('async/waterfall')
 const fetcher = require('../utils/fetcher')
 const Validator = require('validatorjs')
 const StreamerResponse = require('../model/streamer-response.js')
+const helper = require('../utils/twitch_api_helper')
 
 module.exports = (router) => {
   const fetchIndex = (req, res) => {
@@ -10,8 +11,6 @@ module.exports = (router) => {
   }
 
   const fetchStreamer = (req, res, next) => {
-    // TODO: validate
-
     let rules = {
       username: 'string',
       id: 'numeric'
@@ -44,7 +43,7 @@ module.exports = (router) => {
               if (response.status === 200) {
                 response.json().then((body) => {
                   // this means that the user is streaming
-                  if (body.data.length > 0) {
+                  if (helper.isStreaming(body)) {
                     let resBody = new StreamerResponse(true, null)
                     return done(null, resBody, body.data[0].game_id)
                   } else {
@@ -80,7 +79,7 @@ module.exports = (router) => {
                   .json()
                   .then((body) => {
                     if (body.data.length > 0) {
-                      result.gameName = body.data[0].name
+                      result.gameName = helper.extractGameName(body)
                       return res.status(200).json(result)
                     } else {
                       return next({
