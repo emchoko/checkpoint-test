@@ -7,8 +7,8 @@ const headers = {
 }
 
 module.exports = {
-  getStreamerById: (userId) => {
-    return fetch(process.env.API_URL + `streams/?user_id=${userId}`, {
+  getStreamerById: (queryString) => {
+    return fetch(process.env.API_URL + `streams/?${queryString}`, {
       method: 'GET',
       headers: headers
     })

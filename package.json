@@ -21,7 +21,8 @@
     "express": "^4.17.1",
     "node-fetch": "^2.6.0",
     "swagger-jsdoc": "^4.0.0",
-    "swagger-ui-express": "^4.1.4"
+    "swagger-ui-express": "^4.1.4",
+    "validatorjs": "^3.18.1"
   },
   "devDependencies": {
     "chai": "^4.2.0",

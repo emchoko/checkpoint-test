@@ -1,6 +1,7 @@
 'use strict'
 const waterfall = require('async/waterfall')
 const fetcher = require('../utils/fetcher')
+const Validator = require('validatorjs')
 const StreamerResponse = require('../model/streamer-response.js')
 
 module.exports = (router) => {
@@ -8,36 +9,105 @@ module.exports = (router) => {
     return res.send('Documentation here')
   }
 
-  const fetchStreamer = (req, res) => {
-    let userId = req.params.id
+  const fetchStreamer = (req, res, next) => {
+    // TODO: validate
+
+    let rules = {
+      username: 'string',
+      id: 'numeric'
+    }
+
+    let validation = new Validator(
+      { username: req.query.username, id: req.query.id },
+      rules
+    )
+
+    if (validation.fails()) {
+      return res.status(412).json({
+        message:
+          'Query params were not right! Please refer to the documentation!'
+      })
+    }
+
+    let queryString =
+      req.query.id === undefined
+        ? 'user_login=' + req.query.username
+        : 'user_id=' + req.query.id
 
     waterfall(
       [
         // fetch the stream by user_id
         (done) => {
           fetcher
-            .getStreamerById(userId)
-            .then((streamer) => {
-              streamer.json().then((body) => {
-                if (res.statusCode === 200) {
+            .getStreamerById(queryString)
+            .then((response) => {
+              if (response.status === 200) {
+                response.json().then((body) => {
                   // this means that the user is streaming
                   if (body.data.length > 0) {
-                    // done(null, body.data[0].game_id)
                     let resBody = new StreamerResponse(true, null)
-                    res.status(200).json({ streaming: true, game: null })
-                    done(null)
+                    return done(null, resBody, body.data[0].game_id)
                   } else {
+                    // this means that the user is not streaming
                     let resBody = new StreamerResponse(false, null)
-                    res.status(200).json({ streaming: true, game: null })
-                    done(null)
+                    return res.status(200).json(resBody)
                   }
-                } else {
-                  console.log(res.statusCode)
-                  return res.status(res.statusCode).json({
-                    message: 'There was a problem fetching the Twitch API'
-                  })
+                })
+              } else {
+                console.log(response.status)
+                return res.status(response.status).json({
+                  message: 'There was a problem fetching the Twitch API'
+                })
+              }
+            })
+            .catch((err) => {
+              console.error(err)
+              done({
+                code: 500,
+                body: {
+                  message: 'An error occurred during the fetch from Twitch',
+                  err: err
                 }
               })
+            })
+        },
+        (result, gameId, done) => {
+          fetcher
+            .getGameById(gameId)
+            .then((response) => {
+              if (response.status === 200) {
+                response
+                  .json()
+                  .then((body) => {
+                    if (body.data.length > 0) {
+                      result.gameName = body.data[0].name
+                      return res.status(200).json(result)
+                    } else {
+                      return next({
+                        status: 404,
+                        body: {
+                          message: `There was a problem fetching the Twitch API: game with such id ${gameId} not found`
+                        }
+                      })
+                    }
+                  })
+                  .catch((jsonParseError) => {
+                    console.log(jsonParseError)
+                    next({
+                      status: 500,
+                      body: {
+                        message: `There was a problem parsing the response from the Twitch API`
+                      }
+                    })
+                  })
+              } else {
+                next({
+                  status: response.status,
+                  body: {
+                    message: 'There was a problem fetching the Twitch API'
+                  }
+                })
+              }
             })
             .catch((err) => {
               console.error(err)
@@ -50,11 +120,10 @@ module.exports = (router) => {
               })
             })
         }
-        // (gameId, done) => {}
       ],
       (err) => {
         if (err) {
-          return res.status(err.code).json(err.body)
+          next({ status: err.code, body: err.body })
         }
         res.end()
       }
@@ -62,5 +131,5 @@ module.exports = (router) => {
   }
 
   router.get('/', fetchIndex)
-  router.get('/:id', fetchStreamer)
+  router.get('/streams', fetchStreamer)
 }

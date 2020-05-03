@@ -14,6 +14,12 @@ app.use(bodyParser.json())
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 app.use('/api/v1/', routes)
 
+// Error Handler
+app.use(function (err, req, res, next) {
+  console.error(err)
+  res.status(err.status).json(err.body)
+})
+
 app.listen(PORT, () => {
   console.log(`App runs on port ${PORT}!`)
 })
