@@ -6,10 +6,6 @@ const StreamerResponse = require('../model/streamer-response.js')
 const helper = require('../utils/twitch_api_helper')
 
 module.exports = (router) => {
-  const fetchIndex = (req, res) => {
-    return res.send('Documentation here')
-  }
-
   const fetchStreamer = (req, res, next) => {
     let rules = {
       username: 'string',
