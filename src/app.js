@@ -3,6 +3,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const swaggerUi = require('swagger-ui-express')
 const swaggerDocument = require('./utils/swagger-conf.json')
+const PORT = process.env.PORT
 
 const app = express()
 const routes = require('./routes/index')
@@ -13,6 +14,6 @@ app.use(bodyParser.json())
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 app.use('/api/v1/', routes)
 
-app.listen(3000, () => {
-  console.log('App runs on port 9000:3000!')
+app.listen(PORT, () => {
+  console.log(`App runs on port ${PORT}!`)
 })
